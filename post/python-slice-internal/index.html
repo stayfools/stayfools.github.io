@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Python Slice的取数逻辑 | 述</title>
-<link rel="shortcut icon" href="https://stayfools.github.io/favicon.ico?v=1590041838620">
+<link rel="shortcut icon" href="https://stayfools.github.io/favicon.ico?v=1590042062177">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://stayfools.github.io/styles/main.css">
 <link rel="alternate" type="application/atom+xml" title="Python Slice的取数逻辑 | 述 - Atom Feed" href="https://stayfools.github.io/atom.xml">
@@ -24,7 +24,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://stayfools.github.io">
-  <img class="avatar" src="https://stayfools.github.io/images/avatar.png?v=1590041838620" alt="">
+  <img class="avatar" src="https://stayfools.github.io/images/avatar.png?v=1590042062177" alt="">
   </a>
   <h1 class="site-title">
     述
@@ -323,7 +323,7 @@ _PySlice_GetLongIndices(PySliceObject *self, PyObject *length,
 slice(None, -1, -1).indices(10) # (9, 9, -1)
 slice(-1, None, -1).indices(10) # (9, -1, -1)
 </code></pre>
-<p>总之，注意以下 <code>step</code>符号不同时，取的<code>start</code>或<code>stop</code>的默认值不同，并且不取默认值时<code>start</code>或<code>stop</code>都要被加上<code>length</code>转换成正数就可以了。</p>
+<p>总之，注意一下 <code>step</code>符号不同时，取的<code>start</code>或<code>stop</code>的默认值不同，并且不取默认值时<code>start</code>或<code>stop</code>都要被加上<code>length</code>转换成正数就可以了。</p>
 
               </div>
               <div class="toc-container">
