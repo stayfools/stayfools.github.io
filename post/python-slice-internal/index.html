@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Python Slice的取数逻辑 | 述</title>
-<link rel="shortcut icon" href="https://stayfools.github.io/favicon.ico?v=1590029791129">
+<link rel="shortcut icon" href="https://stayfools.github.io/favicon.ico?v=1590030010243">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://stayfools.github.io/styles/main.css">
 <link rel="alternate" type="application/atom+xml" title="Python Slice的取数逻辑 | 述 - Atom Feed" href="https://stayfools.github.io/atom.xml">
@@ -24,7 +24,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://stayfools.github.io">
-  <img class="avatar" src="https://stayfools.github.io/images/avatar.png?v=1590029791129" alt="">
+  <img class="avatar" src="https://stayfools.github.io/images/avatar.png?v=1590030010243" alt="">
   </a>
   <h1 class="site-title">
     述
@@ -95,14 +95,14 @@
             
             <div class="post-content-wrapper">
               <div class="post-content">
-                <p>Python的slice有三个参数：start、stop、step，通常情况下从逻辑上理解都没问题，唯一的问题是 step为负数的时候，可能会面临以下几个困惑：</p>
+                <p>Python的<code>slice</code>有三个参数：start、stop、step，通常情况下从逻辑上理解都没问题，唯一的问题是 step为负数的时候，可能会面临以下几个困惑：</p>
 <ul>
-<li>为什么 l = [1, 2, 3]; l[::-1] 就表示逆序？</li>
-<li>为什么 l = range(10); l[:-3:-1] 的结果是[9, 8, 7]？</li>
+<li>为什么 <code>l = [1, 2, 3]; l[::-1]</code> 就表示逆序？</li>
+<li>为什么 <code>l = range(10); l[:-3:-1]</code> 的结果是<code>[9, 8, 7]</code>？</li>
 </ul>
-<p>Python的slice对象有个indices 方法是用来转换最终的取数的start、stop和end，查看源码就能知道slice的逻辑是什么样的。</p>
-<p>参考CPython的PySlice_GetIndices源码:</p>
-<pre><code>int
+<p>Python的<code>slice</code>对象有个<code>indices</code> 方法是用来转换最终的取数的start、stop和end，查看源码就能知道<code>slice</code>的逻辑是什么样的。</p>
+<p>参考CPython的<code>PySlice_GetIndices</code><a href="https://github.com/python/cpython/blob/aa92a7cf210c98ad94229f282221136d846942db/Objects/sliceobject.c#L165">源码</a>:</p>
+<pre><code class="language-c">int
 PySlice_GetIndices(PyObject *_r, Py_ssize_t length,
                    Py_ssize_t *start, Py_ssize_t *stop, Py_ssize_t *step)
 {
