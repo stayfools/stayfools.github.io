@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://stayfools.github.io</id>
     <title>述</title>
-    <updated>2020-05-21T04:05:12.044Z</updated>
+    <updated>2020-05-21T06:13:34.272Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://stayfools.github.io"/>
     <link rel="self" href="https://stayfools.github.io/atom.xml"/>
@@ -16,54 +16,234 @@
         <link href="https://stayfools.github.io/post/python-slice-internal/">
         </link>
         <updated>2020-05-21T02:51:00.000Z</updated>
-        <content type="html"><![CDATA[<p><strong>本文存在错误！需要下线</strong></p>
-<p>Python的<code>slice</code>有三个参数：<code>start</code>、<code>stop</code>、<code>step</code>，通常情况下从逻辑上理解都没问题，唯一的问题是 step为负数的时候，可能会面临以下几个困惑：</p>
+        <content type="html"><![CDATA[<p>Python的<code>slice</code>有三个参数：<code>start</code>、<code>stop</code>、<code>step</code>，通常情况下从逻辑上理解都没问题，唯一的问题是 step为负数的时候，可能会面临以下几个困惑：</p>
 <ul>
 <li>为什么 <code>l = [1, 2, 3]; l[::-1]</code> 就表示逆序？</li>
 <li>为什么 <code>l = range(10); l[:-3:-1]</code> 的结果是<code>[9, 8, 7]</code>？</li>
 </ul>
 <p>Python的<code>slice</code>对象有个<code>indices</code> 方法是用来转换最终的取数的<code>start</code>、<code>stop</code>和<code>end</code>，查看源码就能知道<code>slice</code>的逻辑是什么样的。</p>
-<p>参考CPython的<code>PySlice_GetIndices</code><a href="https://github.com/python/cpython/blob/aa92a7cf210c98ad94229f282221136d846942db/Objects/sliceobject.c#L165">源码</a>:</p>
-<pre><code class="language-c">int
-PySlice_GetIndices(PyObject *_r, Py_ssize_t length,
-                   Py_ssize_t *start, Py_ssize_t *stop, Py_ssize_t *step)
+<p>参考CPython的<code>slice_indices</code><a href="https://github.com/python/cpython/blob/d9ea5cae1d07e1ee8b03540a9367c26205e0e360/Objects/sliceobject.c#L512">源码</a>:</p>
+<pre><code class="language-c">/* Implementation of slice.indices. */
+
+static PyObject*
+slice_indices(PySliceObject* self, PyObject* len)
 {
-    PySliceObject *r = (PySliceObject*)_r;
-    /* XXX support long ints */
-    if (r-&gt;step == Py_None) {
-        *step = 1;
-    } else {
-        if (!PyLong_Check(r-&gt;step)) return -1;
-        *step = PyLong_AsSsize_t(r-&gt;step);
+    PyObject *start, *stop, *step;
+    PyObject *length;
+    int error;
+
+    /* Convert length to an integer if necessary; raise for negative length. */
+    length = PyNumber_Index(len);
+    if (length == NULL)
+        return NULL;
+
+    if (_PyLong_Sign(length) &lt; 0) {
+        PyErr_SetString(PyExc_ValueError,
+                        &quot;length should not be negative&quot;);
+        Py_DECREF(length);
+        return NULL;
     }
-    if (r-&gt;start == Py_None) {
-        *start = *step &lt; 0 ? length-1 : 0;
-    } else {
-        if (!PyLong_Check(r-&gt;start)) return -1;
-        *start = PyLong_AsSsize_t(r-&gt;start);
-        if (*start &lt; 0) *start += length;
-    }
-    if (r-&gt;stop == Py_None) 
-        *stop = *step &lt; 0 ? -1 : length;
-    } else {
-        if (!PyLong_Check(r-&gt;stop)) return -1;
-        *stop = PyLong_AsSsize_t(r-&gt;stop);
-        if (*stop &lt; 0) *stop += length;
-    }
-    if (*stop &gt; length) return -1;
-    if (*start &gt;= length) return -1;
-    if (*step == 0) return -1;
-    return 0;
+
+    error = _PySlice_GetLongIndices(self, length, &amp;start, &amp;stop, &amp;step);
+    Py_DECREF(length);
+    if (error == -1)
+        return NULL;
+    else
+        return Py_BuildValue(&quot;(NNN)&quot;, start, stop, step);
 }
 </code></pre>
-<p>从代码上很容易看出来：</p>
+<p>从代码上很容易看出来，处理indices逻辑是在</p>
+<pre><code class="language-c">error = _PySlice_GetLongIndices(self, length, &amp;start, &amp;stop, &amp;step);
+</code></pre>
+<p>这一行实现的，继续看<a href="https://github.com/python/cpython/blob/d9ea5cae1d07e1ee8b03540a9367c26205e0e360/Objects/sliceobject.c#L372"><code>_PySlice_GetLongIndices</code></a> 这个函数：</p>
+<pre><code class="language-c">/* Compute slice indices given a slice and length.  Return -1 on failure.  Used
+   by slice.indices and rangeobject slicing.  Assumes that `len` is a
+   nonnegative instance of PyLong. */
+
+int
+_PySlice_GetLongIndices(PySliceObject *self, PyObject *length,
+                        PyObject **start_ptr, PyObject **stop_ptr,
+                        PyObject **step_ptr)
+{
+    PyObject *start=NULL, *stop=NULL, *step=NULL;
+    PyObject *upper=NULL, *lower=NULL;
+    int step_is_negative, cmp_result;
+
+    /* Convert step to an integer; raise for zero step. */
+    if (self-&gt;step == Py_None) {
+        step = _PyLong_One;
+        Py_INCREF(step);
+        step_is_negative = 0;
+    }
+    else {
+        int step_sign;
+        step = evaluate_slice_index(self-&gt;step);
+        if (step == NULL)
+            goto error;
+        step_sign = _PyLong_Sign(step);
+        if (step_sign == 0) {
+            PyErr_SetString(PyExc_ValueError,
+                            &quot;slice step cannot be zero&quot;);
+            goto error;
+        }
+        step_is_negative = step_sign &lt; 0;
+    }
+
+    /* Find lower and upper bounds for start and stop. */
+    if (step_is_negative) {
+        lower = PyLong_FromLong(-1L);
+        if (lower == NULL)
+            goto error;
+
+        upper = PyNumber_Add(length, lower);
+        if (upper == NULL)
+            goto error;
+    }
+    else {
+        lower = _PyLong_Zero;
+        Py_INCREF(lower);
+        upper = length;
+        Py_INCREF(upper);
+    }
+
+    /* Compute start. */
+    if (self-&gt;start == Py_None) {
+        start = step_is_negative ? upper : lower;
+        Py_INCREF(start);
+    }
+    else {
+        start = evaluate_slice_index(self-&gt;start);
+        if (start == NULL)
+            goto error;
+
+        if (_PyLong_Sign(start) &lt; 0) {
+            /* start += length */
+            PyObject *tmp = PyNumber_Add(start, length);
+            Py_DECREF(start);
+            start = tmp;
+            if (start == NULL)
+                goto error;
+
+            cmp_result = PyObject_RichCompareBool(start, lower, Py_LT);
+            if (cmp_result &lt; 0)
+                goto error;
+            if (cmp_result) {
+                Py_INCREF(lower);
+                Py_DECREF(start);
+                start = lower;
+            }
+        }
+        else {
+            cmp_result = PyObject_RichCompareBool(start, upper, Py_GT);
+            if (cmp_result &lt; 0)
+                goto error;
+            if (cmp_result) {
+                Py_INCREF(upper);
+                Py_DECREF(start);
+                start = upper;
+            }
+        }
+    }
+
+    /* Compute stop. */
+    if (self-&gt;stop == Py_None) {
+        stop = step_is_negative ? lower : upper;
+        Py_INCREF(stop);
+    }
+    else {
+        stop = evaluate_slice_index(self-&gt;stop);
+        if (stop == NULL)
+            goto error;
+
+        if (_PyLong_Sign(stop) &lt; 0) {
+            /* stop += length */
+            PyObject *tmp = PyNumber_Add(stop, length);
+            Py_DECREF(stop);
+            stop = tmp;
+            if (stop == NULL)
+                goto error;
+
+            cmp_result = PyObject_RichCompareBool(stop, lower, Py_LT);
+            if (cmp_result &lt; 0)
+                goto error;
+            if (cmp_result) {
+                Py_INCREF(lower);
+                Py_DECREF(stop);
+                stop = lower;
+            }
+        }
+        else {
+            cmp_result = PyObject_RichCompareBool(stop, upper, Py_GT);
+            if (cmp_result &lt; 0)
+                goto error;
+            if (cmp_result) {
+                Py_INCREF(upper);
+                Py_DECREF(stop);
+                stop = upper;
+            }
+        }
+    }
+
+    *start_ptr = start;
+    *stop_ptr = stop;
+    *step_ptr = step;
+    Py_DECREF(upper);
+    Py_DECREF(lower);
+    return 0;
+
+  error:
+    *start_ptr = *stop_ptr = *step_ptr = NULL;
+    Py_XDECREF(start);
+    Py_XDECREF(stop);
+    Py_XDECREF(step);
+    Py_XDECREF(upper);
+    Py_XDECREF(lower);
+    return -1;
+}
+</code></pre>
+<p>这个函数大概类似以下的Python代码：</p>
+<pre><code class="language-python">def indices(length, start=None, stop=None, step=None):
+    if step is None:
+        step = 1
+    step_is_negative = step &lt; 0
+    if step_is_negative:
+        lower = -1
+        upper = length + lower # length - 1
+    else:
+        lower, upper = 0, length
+
+    if start is None:
+        start = upper if step_is_negative else lower
+    elif start &lt; 0:
+        start += length
+        start = max(start, lower) # 
+    else: # start&gt;=0
+        start = min(start, upper)
+    
+    if stop is None:
+        stop = lower if step_is_negative else upper
+    elif stop &lt; 0:
+        stop += length
+        stop = max(stop, lower)
+    else:
+        stop = min(stop, upper)
+
+    return start, stop, step
+</code></pre>
+<p>梳理一下这个函数的逻辑：</p>
 <ul>
-<li><code>step</code>的默认值是1</li>
-<li><code>step&gt;0</code> 时，默认值：<code>start=0</code>， <code>stop=length</code></li>
-<li><code>step&lt;0</code> 时，默认值：<code>start=length-1</code>， <code>stop=-1</code></li>
-<li>当<code>start&lt;0</code>或<code>stop&lt;0</code>且有值时，<code>start+=length</code> 或 <code>stop+=length</code> 变成正数</li>
+<li><code>Py_INCREF</code> 是引用计数不用管；<code>evaluate_slice_index</code>是数据类型的转换，也不用管；<code>PyObject_RichCompareBool(o1, o2, op)</code> 是比较两个数，错误返回-1， 0表示结果是false，1表示结果是true</li>
+<li><code>step</code>的默认值是1， 设<code>n=length</code></li>
+<li><code>step&gt;0</code> 时，<code>lower=0, upper=n</code>，默认值：<code>start=0</code>， <code>stop=n</code></li>
+<li><code>step&lt;0</code> 时，<code>lower=-1, upper=n-1</code>，默认值：<code>start=n-1</code>， <code>stop=-1</code>, 注意这里 <code>stop=-1</code>的情况，因为转换以后就可以直接按类似 <code>for (i=start; i &gt; stop; i+=step)</code>，所以<code>stop=-1</code>还是一直取得末尾（末尾是包含的）和在Python中直接用slice不同，不要混淆</li>
+<li>当<code>start&lt;0</code>或<code>stop&lt;0</code>且不是默认值时，<code>start+=n</code> 或 <code>stop+=n</code> 变成正数</li>
+<li>当然，代码中还有处理越界条件的逻辑，但不影响整体逻辑<br>
+举几个例子：</li>
 </ul>
-<p>总之，start或stop因step的符号不同而默认值不同，当start或stop为负时要加上长度变成正的。</p>
+<pre><code class="language-python">slice(None, -3, -1).indices(10) # (9, 7, -1)
+slice(None, -1, -1).indices(10) # (9, 9, -1)
+slice(-1, None, -1).indices(10) # (9, -1, -1)
+</code></pre>
 ]]></content>
     </entry>
 </feed>
