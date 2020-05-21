@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://stayfools.github.io</id>
+    <title>述</title>
+    <updated>2020-05-21T02:37:09.526Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://stayfools.github.io"/>
+    <link rel="self" href="https://stayfools.github.io/atom.xml"/>
+    <subtitle>聊笔记浮生</subtitle>
+    <logo>https://stayfools.github.io/images/avatar.png</logo>
+    <icon>https://stayfools.github.io/favicon.ico</icon>
+    <rights>All rights reserved 2020, 述</rights>
+    <entry>
+        <title type="html"><![CDATA[测试文件]]></title>
+        <id>https://stayfools.github.io/post/ce-shi-wen-jian/</id>
+        <link href="https://stayfools.github.io/post/ce-shi-wen-jian/">
+        </link>
+        <updated>2020-05-21T02:34:36.000Z</updated>
+        <content type="html"><![CDATA[<p><strong>这是测试</strong></p>
+<pre><code class="language-python">import sys
+
+print(sys.version)
+</code></pre>
+<p class='katex-block katex-error' title='ParseError: KaTeX parse error: Undefined control sequence: \pii at position 3: e^\̲p̲i̲i̲+1 = 0
+'>e^\pii+1 = 0
+</p>
+]]></content>
+    </entry>
+</feed>
