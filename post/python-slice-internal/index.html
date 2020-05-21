@@ -1,106 +1,108 @@
+
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+<meta charset="utf-8" >
+
 <title>Python Slice的取数逻辑 | 述</title>
-<link rel="shortcut icon" href="https://stayfools.github.io/favicon.ico?v=1590030010243">
-<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<meta name="description" content="聊笔记浮生">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://stayfools.github.io/favicon.ico?v=1590033909593">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://stayfools.github.io/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="Python Slice的取数逻辑 | 述 - Atom Feed" href="https://stayfools.github.io/atom.xml">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
 
-    <meta name="description" content="Python的slice有三个参数：start、stop、step，通常情况下从逻辑上理解都没问题，唯一的问题是 step为负数的时候，可能会面临以下几个困惑：
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
 
-为什么 l = [1, 2, 3]; l[::-1] 就表示逆序？
-为什么 ..." />
-    <meta name="keywords" content="python" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
-    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+
   </head>
   <body>
-    <div class="main">
-      <div class="main-content">
-        <div class="site-header">
-  <a href="https://stayfools.github.io">
-  <img class="avatar" src="https://stayfools.github.io/images/avatar.png?v=1590030010243" alt="">
-  </a>
-  <h1 class="site-title">
-    述
-  </h1>
-  <p class="site-description">
-    聊笔记浮生
-  </p>
-  <div class="menu-container">
-    
-      
-        <a href="/" class="menu">
-          首页
-        </a>
-      
-    
-      
-        <a href="/archives" class="menu">
-          归档
-        </a>
-      
-    
-      
-        <a href="/tags" class="menu">
-          标签
-        </a>
-      
-    
-      
-        <a href="/post/about" class="menu">
-          关于
-        </a>
-      
-    
-  </div>
-  <div class="social-container">
-    
-      
-    
-      
-    
-      
-    
-      
-    
-      
-    
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://stayfools.github.io">
+        <img class="avatar" src="https://stayfools.github.io/images/avatar.png?v=1590033909593" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://stayfools.github.io">
+        <h1 class="site-title">述</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
   </div>
 </div>
 
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="menu purple-link">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+
+      <div class="content-container">
         <div class="post-detail">
-          <article class="post">
-            <h2 class="post-title">
-              Python Slice的取数逻辑
-            </h2>
-            <div class="post-info">
-              <span>
-                2020-05-21
-              </span>
-              <span>
-                2 min read
-              </span>
-              
-                <a href="https://stayfools.github.io/tag/cshseix1V/" class="post-tag">
-                  # python
-                </a>
-              
-            </div>
+          
+          <h2 class="post-title">Python Slice的取数逻辑</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2020-05-21</span>
             
-            <div class="post-content-wrapper">
-              <div class="post-content">
-                <p>Python的<code>slice</code>有三个参数：start、stop、step，通常情况下从逻辑上理解都没问题，唯一的问题是 step为负数的时候，可能会面临以下几个困惑：</p>
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://stayfools.github.io/tag/cshseix1V/">
+                    python
+                    
+                  </a>
+                
+              </span>
+            
+          </div>
+          <div class="post-content">
+            <p><strong>本文存在错误！需要下线</strong></p>
+<p>Python的<code>slice</code>有三个参数：<code>start</code>、<code>stop</code>、<code>step</code>，通常情况下从逻辑上理解都没问题，唯一的问题是 step为负数的时候，可能会面临以下几个困惑：</p>
 <ul>
 <li>为什么 <code>l = [1, 2, 3]; l[::-1]</code> 就表示逆序？</li>
 <li>为什么 <code>l = range(10); l[:-3:-1]</code> 的结果是<code>[9, 8, 7]</code>？</li>
 </ul>
-<p>Python的<code>slice</code>对象有个<code>indices</code> 方法是用来转换最终的取数的start、stop和end，查看源码就能知道<code>slice</code>的逻辑是什么样的。</p>
+<p>Python的<code>slice</code>对象有个<code>indices</code> 方法是用来转换最终的取数的<code>start</code>、<code>stop</code>和<code>end</code>，查看源码就能知道<code>slice</code>的逻辑是什么样的。</p>
 <p>参考CPython的<code>PySlice_GetIndices</code><a href="https://github.com/python/cpython/blob/aa92a7cf210c98ad94229f282221136d846942db/Objects/sliceobject.c#L165">源码</a>:</p>
 <pre><code class="language-c">int
 PySlice_GetIndices(PyObject *_r, Py_ssize_t length,
@@ -136,74 +138,56 @@ PySlice_GetIndices(PyObject *_r, Py_ssize_t length,
 </code></pre>
 <p>从代码上很容易看出来：</p>
 <ul>
-<li>step的默认值是1</li>
-<li>step&gt;0 时，默认值：start=0， stop=length-1</li>
-<li>step&lt;0 时，默认值：start=length-1， stop=0</li>
-<li>当start&lt;0或stop&lt;0时，start+=length 或 stop+=length 变成正数</li>
+<li><code>step</code>的默认值是1</li>
+<li><code>step&gt;0</code> 时，默认值：<code>start=0</code>， <code>stop=length</code></li>
+<li><code>step&lt;0</code> 时，默认值：<code>start=length-1</code>， <code>stop=-1</code></li>
+<li>当<code>start&lt;0</code>或<code>stop&lt;0</code>且有值时，<code>start+=length</code> 或 <code>stop+=length</code> 变成正数</li>
 </ul>
 <p>总之，start或stop因step的符号不同而默认值不同，当start或stop为负时要加上长度变成正的。</p>
 
-              </div>
-              <div class="toc-container">
-                
-              </div>
-            </div>
-          </article>
+          </div>
         </div>
 
         
+      </div>
 
-        
+      
 
-        <div class="site-footer">
-  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
-  <a class="rss" href="https://stayfools.github.io/atom.xml" target="_blank">
-    <i class="ri-rss-line"></i> RSS
-  </a>
+      <div class="site-footer">
+  <div class="slogan">聊笔记浮生</div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://stayfools.github.io/atom.xml" target="_blank">RSS</a>
 </div>
 
-      </div>
+
     </div>
+    <script type="application/javascript">
 
-    <script>
-      hljs.initHighlightingOnLoad()
+hljs.initHighlightingOnLoad()
 
-      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
 
-      // This should probably be throttled.
-      // Especially because it triggers during smooth scrolling.
-      // https://lodash.com/docs/4.17.10#throttle
-      // You could do like...
-      // window.addEventListener("scroll", () => {
-      //    _.throttle(doThatStuff, 100);
-      // });
-      // Only not doing it here to keep this Pen dependency-free.
+</script>
 
-      window.addEventListener("scroll", event => {
-        let fromTop = window.scrollY;
 
-        mainNavLinks.forEach((link, index) => {
-          let section = document.getElementById(decodeURI(link.hash).substring(1));
-          let nextSection = null
-          if (mainNavLinks[index + 1]) {
-            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
-          }
-          if (section.offsetTop <= fromTop) {
-            if (nextSection) {
-              if (nextSection.offsetTop > fromTop) {
-                link.classList.add("current");
-              } else {
-                link.classList.remove("current");    
-              }
-            } else {
-              link.classList.add("current");
-            }
-          } else {
-            link.classList.remove("current");
-          }
-        });
-      });
 
-    </script>
+
   </body>
 </html>

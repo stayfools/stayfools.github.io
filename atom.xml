@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://stayfools.github.io</id>
     <title>述</title>
-    <updated>2020-05-21T03:00:24.171Z</updated>
+    <updated>2020-05-21T04:05:12.044Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://stayfools.github.io"/>
     <link rel="self" href="https://stayfools.github.io/atom.xml"/>
@@ -16,12 +16,13 @@
         <link href="https://stayfools.github.io/post/python-slice-internal/">
         </link>
         <updated>2020-05-21T02:51:00.000Z</updated>
-        <content type="html"><![CDATA[<p>Python的<code>slice</code>有三个参数：start、stop、step，通常情况下从逻辑上理解都没问题，唯一的问题是 step为负数的时候，可能会面临以下几个困惑：</p>
+        <content type="html"><![CDATA[<p><strong>本文存在错误！需要下线</strong></p>
+<p>Python的<code>slice</code>有三个参数：<code>start</code>、<code>stop</code>、<code>step</code>，通常情况下从逻辑上理解都没问题，唯一的问题是 step为负数的时候，可能会面临以下几个困惑：</p>
 <ul>
 <li>为什么 <code>l = [1, 2, 3]; l[::-1]</code> 就表示逆序？</li>
 <li>为什么 <code>l = range(10); l[:-3:-1]</code> 的结果是<code>[9, 8, 7]</code>？</li>
 </ul>
-<p>Python的<code>slice</code>对象有个<code>indices</code> 方法是用来转换最终的取数的start、stop和end，查看源码就能知道<code>slice</code>的逻辑是什么样的。</p>
+<p>Python的<code>slice</code>对象有个<code>indices</code> 方法是用来转换最终的取数的<code>start</code>、<code>stop</code>和<code>end</code>，查看源码就能知道<code>slice</code>的逻辑是什么样的。</p>
 <p>参考CPython的<code>PySlice_GetIndices</code><a href="https://github.com/python/cpython/blob/aa92a7cf210c98ad94229f282221136d846942db/Objects/sliceobject.c#L165">源码</a>:</p>
 <pre><code class="language-c">int
 PySlice_GetIndices(PyObject *_r, Py_ssize_t length,
@@ -57,10 +58,10 @@ PySlice_GetIndices(PyObject *_r, Py_ssize_t length,
 </code></pre>
 <p>从代码上很容易看出来：</p>
 <ul>
-<li>step的默认值是1</li>
-<li>step&gt;0 时，默认值：start=0， stop=length-1</li>
-<li>step&lt;0 时，默认值：start=length-1， stop=0</li>
-<li>当start&lt;0或stop&lt;0时，start+=length 或 stop+=length 变成正数</li>
+<li><code>step</code>的默认值是1</li>
+<li><code>step&gt;0</code> 时，默认值：<code>start=0</code>， <code>stop=length</code></li>
+<li><code>step&lt;0</code> 时，默认值：<code>start=length-1</code>， <code>stop=-1</code></li>
+<li>当<code>start&lt;0</code>或<code>stop&lt;0</code>且有值时，<code>start+=length</code> 或 <code>stop+=length</code> 变成正数</li>
 </ul>
 <p>总之，start或stop因step的符号不同而默认值不同，当start或stop为负时要加上长度变成正的。</p>
 ]]></content>
