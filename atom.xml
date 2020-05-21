@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://stayfools.github.io</id>
     <title>述</title>
-    <updated>2020-05-21T06:13:34.272Z</updated>
+    <updated>2020-05-21T06:17:21.241Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://stayfools.github.io"/>
     <link rel="self" href="https://stayfools.github.io/atom.xml"/>
@@ -244,6 +244,7 @@ _PySlice_GetLongIndices(PySliceObject *self, PyObject *length,
 slice(None, -1, -1).indices(10) # (9, 9, -1)
 slice(-1, None, -1).indices(10) # (9, -1, -1)
 </code></pre>
+<p>总之，注意以下 <code>step</code>符号不同时，取的<code>start</code>或<code>stop</code>的默认值不同，并且不取默认值时<code>start</code>或<code>stop</code>都要被加上<code>length</code>转换成正数就可以了。</p>
 ]]></content>
     </entry>
 </feed>
